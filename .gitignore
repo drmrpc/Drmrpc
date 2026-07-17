@@ -4,4 +4,6 @@ bios/
 images/
 *.iso
 *.img
+*.qcow2
 .DS_Store
+dist/
