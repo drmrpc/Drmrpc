@@ -1,13 +1,26 @@
-FROM ghcr.io/m1k1o/neko/xfce:latest
+FROM ubuntu:22.04
 
-# Install additional tools if needed
+# Install dependencies for v86
 RUN apt-get update && apt-get install -y \
+    python3 \
+    python3-pip \
+    git \
     curl \
     wget \
-    git \
+    build-essential \
+    nodejs \
+    npm \
     && rm -rf /var/lib/apt/lists/*
 
-# Expose the default n.eko port
+# Install v86 server
+WORKDIR /app
+RUN git clone https://github.com/copy/v86.git .
+
+# Install npm dependencies
+RUN npm install
+
+# Expose port 8080
 EXPOSE 8080
 
-# The base image handles the startup, no need to override CMD
+# Start v86 server
+CMD ["node", "tools/http-server.js", "--port", "8080"]
