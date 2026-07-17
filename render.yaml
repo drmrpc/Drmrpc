@@ -13,14 +13,8 @@ services:
     # Environment variables for n.eko configuration
     envVars:
       - key: NEKO_SCREEN
-        value: "720x1280@30"
-      - key: NEKO_ICELITE
-        value: "true"
+        value: "1280x720@30"
       - key: NEKO_PASSWORD
-        value: changeme123
+        value: "test123"
       - key: NEKO_PASSWORD_ADMIN
-        value: adminpass456
-      - key: NEKO_FILE_TRANSFER_TIMEOUT
-        value: "60"
-      - key: NEKO_LOCKS
-        value: "control,login"
+        value: "admin123"
