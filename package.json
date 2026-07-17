@@ -1,0 +1,16 @@
+{
+  "name": "v86-windows-xp",
+  "version": "1.0.0",
+  "description": "Windows XP Emulator using v86",
+  "main": "index.js",
+  "scripts": {
+    "build": "cd v86 2>/dev/null || (npm run build:v86)",
+    "build:v86": "make all",
+    "serve": "http-server -p 8080 -c-1",
+    "dev": "http-server -p 8080 -c-1"
+  },
+  "dependencies": {
+    "http-server": "^14.1.1"
+  },
+  "devDependencies": {}
+}

@@ -1,0 +1,7 @@
+node_modules/
+build/
+bios/
+images/
+*.iso
+*.img
+.DS_Store

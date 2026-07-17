@@ -1,26 +1,26 @@
-FROM ubuntu:22.04
+FROM node:18-alpine
 
-# Install dependencies for v86
-RUN apt-get update && apt-get install -y \
+# Install dependencies
+RUN apk add --no-cache \
     python3 \
-    python3-pip \
+    make \
+    g++ \
     git \
     curl \
-    wget \
-    build-essential \
-    nodejs \
-    npm \
-    && rm -rf /var/lib/apt/lists/*
+    wget
 
-# Install v86 server
+# Clone and build v86
 WORKDIR /app
 RUN git clone https://github.com/copy/v86.git .
 
-# Install npm dependencies
+# Install dependencies
 RUN npm install
+
+# Build v86
+RUN npm run build
 
 # Expose port 8080
 EXPOSE 8080
 
-# Start v86 server
-CMD ["node", "tools/http-server.js", "--port", "8080"]
+# Start HTTP server
+CMD ["npm", "run", "serve"]

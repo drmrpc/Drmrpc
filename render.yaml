@@ -1,20 +1,10 @@
 services:
   - type: web
-    name: neko-vdesktop
+    name: v86-windows-xp
     env: docker
     dockerfilePath: ./Dockerfile
     plan: free
     
-    # Expose port 8080
     ports:
       - port: 8080
         protocol: http
-    
-    # Environment variables for n.eko configuration
-    envVars:
-      - key: NEKO_SCREEN
-        value: "1280x720@30"
-      - key: NEKO_PASSWORD
-        value: "test123"
-      - key: NEKO_PASSWORD_ADMIN
-        value: "admin123"
