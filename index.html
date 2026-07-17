@@ -2,28 +2,55 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+    <meta name="apple-mobile-web-app-title" content="Windows XP">
+    <meta name="theme-color" content="#0078d4">
     <title>Windows XP</title>
     <link rel="icon" type="image/x-icon" href="favicon.ico">
+    <link rel="apple-touch-icon" href="favicon.ico">
     <style>
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
+            -webkit-user-select: none;
+            -webkit-touch-callout: none;
+            user-select: none;
         }
 
         html, body {
             width: 100%;
             height: 100vh;
+            height: 100dvh;
             background: #0078d4;
             font-family: 'MS Sans Serif', 'Tahoma', Arial, sans-serif;
             overflow: hidden;
             touch-action: none;
+            -webkit-font-smoothing: antialiased;
+            -webkit-text-size-adjust: 100%;
         }
 
         body {
             display: flex;
             flex-direction: column;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+        }
+
+        .header {
+            display: none;
+            padding: 8px 12px;
+            background: linear-gradient(180deg, #0078d4 0%, #006fc0 100%);
+            color: #fff;
+            font-size: 13px;
+            font-weight: bold;
+            border-bottom: 1px solid #005a9e;
+            z-index: 20;
         }
 
         .container {
@@ -35,100 +62,214 @@
             background: linear-gradient(180deg, #008fe7 0%, #0078d4 100%);
             position: relative;
             overflow: hidden;
+            -webkit-user-select: none;
         }
 
         #screen {
             display: block;
             image-rendering: pixelated;
             image-rendering: crisp-edges;
+            -webkit-image-rendering: pixelated;
             max-width: 100%;
             max-height: 100%;
-            width: auto;
-            height: auto;
-            border: 2px solid #dfdfdf;
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            touch-action: none;
+        }
+
+        .controls {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            display: flex;
+            gap: 8px;
+            padding: 8px;
+            background: rgba(0, 0, 0, 0.8);
+            border-top: 1px solid rgba(255, 255, 255, 0.2);
+            z-index: 30;
+            max-height: 60px;
+            overflow-x: auto;
+        }
+
+        .btn {
+            flex: 0 0 auto;
+            padding: 6px 10px;
+            background: #1e90ff;
+            color: #fff;
+            border: 1px solid #0078d4;
+            border-radius: 3px;
+            font-size: 11px;
+            font-weight: bold;
+            cursor: pointer;
+            touch-action: manipulation;
+            -webkit-user-select: none;
+            white-space: nowrap;
+            user-select: none;
+        }
+
+        .btn:active {
+            background: #0078d4;
+            transform: scale(0.95);
+        }
+
+        .status {
+            position: fixed;
+            top: 8px;
+            left: 8px;
+            right: 8px;
+            background: rgba(0, 0, 0, 0.7);
+            color: #0f0;
+            padding: 6px 10px;
+            border-radius: 3px;
+            font-size: 10px;
+            font-family: 'Courier New', monospace;
+            z-index: 40;
+            max-width: 90vw;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
         }
 
         .loading {
-            position: absolute;
+            position: fixed;
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
             text-align: center;
             color: #fff;
-            font-size: 18px;
+            font-size: 16px;
             font-weight: bold;
             z-index: 100;
-            background: rgba(0, 0, 0, 0.3);
-            padding: 40px;
+            background: rgba(0, 0, 0, 0.5);
+            padding: 30px;
             border-radius: 8px;
             backdrop-filter: blur(5px);
         }
 
         .spinner {
-            width: 50px;
-            height: 50px;
-            border: 4px solid rgba(255, 255, 255, 0.3);
+            width: 40px;
+            height: 40px;
+            border: 3px solid rgba(255, 255, 255, 0.3);
             border-top-color: #fff;
             border-radius: 50%;
             animation: spin 1s linear infinite;
-            margin: 20px auto;
+            margin: 15px auto;
         }
 
         @keyframes spin {
             to { transform: rotate(360deg); }
         }
 
-        .status {
-            position: fixed;
-            bottom: 20px;
-            left: 50%;
-            transform: translateX(-50%);
-            background: rgba(0, 0, 0, 0.7);
-            color: #0f0;
-            padding: 8px 16px;
+        .error {
+            background: rgba(200, 0, 0, 0.9);
+            color: #fff;
+            padding: 15px;
+            text-align: center;
             border-radius: 4px;
             font-size: 12px;
-            font-family: 'Courier New', monospace;
-            z-index: 50;
-            min-width: 200px;
-            text-align: center;
+            line-height: 1.4;
         }
 
-        .error {
-            background: rgba(200, 0, 0, 0.8);
-            color: #fff;
-            padding: 20px;
-            text-align: center;
-            border-radius: 4px;
-            max-width: 500px;
-        }
-
-        .keyboard-hint {
+        .keyboard {
             position: fixed;
-            top: 10px;
-            left: 10px;
-            color: rgba(255, 255, 255, 0.6);
-            font-size: 11px;
-            background: rgba(0, 0, 0, 0.3);
-            padding: 4px 8px;
+            bottom: 70px;
+            left: 0;
+            right: 0;
+            background: rgba(0, 0, 0, 0.9);
+            display: none;
+            flex-wrap: wrap;
+            gap: 4px;
+            padding: 8px;
+            border-top: 1px solid rgba(255, 255, 255, 0.2);
+            z-index: 25;
+            max-height: 120px;
+            overflow-y: auto;
+        }
+
+        .keyboard.active {
+            display: flex;
+        }
+
+        .key {
+            flex: 0 0 calc(25% - 3px);
+            padding: 6px;
+            background: #333;
+            color: #fff;
+            border: 1px solid #555;
             border-radius: 3px;
-            z-index: 40;
+            text-align: center;
+            font-size: 10px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .key:active {
+            background: #555;
+        }
+
+        /* Mobile landscape */
+        @media (orientation: landscape) {
+            .controls {
+                max-height: 50px;
+            }
+            
+            .btn {
+                padding: 4px 8px;
+                font-size: 10px;
+            }
+        }
+
+        /* Prevent iOS scroll bounce */
+        body {
+            position: fixed;
+            overscroll-behavior: none;
+        }
+
+        /* Safe area for notch/dynamic island */
+        @supports (padding: max(0px)) {
+            body {
+                padding-top: max(0px, env(safe-area-inset-top));
+                padding-bottom: max(0px, env(safe-area-inset-bottom));
+                padding-left: max(0px, env(safe-area-inset-left));
+                padding-right: max(0px, env(safe-area-inset-right));
+            }
         }
     </style>
 </head>
 <body>
-    <div class="keyboard-hint">Click to focus • Right-click for menu • Ctrl+Alt+Del to reboot</div>
+    <div class="header" id="header">Windows XP</div>
+    
+    <div class="status" id="status">⏳ Starting...</div>
     
     <div class="container">
         <div class="loading" id="loading">
-            <div>🔄 Starting Windows XP...</div>
+            <div>🔄 Starting Windows XP</div>
             <div class="spinner"></div>
-            <div style="margin-top: 20px; font-size: 14px; color: #ddd;">This may take 1-2 minutes</div>
+            <div style="margin-top: 15px; font-size: 12px; color: #bbb;">1-2 minutes</div>
         </div>
         <canvas id="screen"></canvas>
     </div>
-    
-    <div class="status" id="status">Initializing...</div>
+
+    <div class="keyboard" id="keyboard">
+        <div class="key" data-key="Tab">Tab</div>
+        <div class="key" data-key="ArrowUp">↑</div>
+        <div class="key" data-key="ArrowDown">↓</div>
+        <div class="key" data-key="Enter">Enter</div>
+        <div class="key" data-key="Escape">Esc</div>
+        <div class="key" data-key="ArrowLeft">←</div>
+        <div class="key" data-key="ArrowRight">→</div>
+        <div class="key" data-key="Backspace">←Del</div>
+    </div>
+
+    <div class="controls">
+        <button class="btn" id="keyboard-toggle">⌨️ Keys</button>
+        <button class="btn" id="mouse-toggle">🖱️ Click</button>
+        <button class="btn" id="screenshot">📸 SS</button>
+        <button class="btn" id="reboot">🔄 Reboot</button>
+        <button class="btn" id="volume">🔊 Audio</button>
+    </div>
 
     <script src="build/v86.js"></script>
     <script>
@@ -138,9 +279,17 @@
         const statusEl = document.getElementById('status');
         const loadingEl = document.getElementById('loading');
         const screenEl = document.getElementById('screen');
+        const keyboardEl = document.getElementById('keyboard');
+        const keyboardToggle = document.getElementById('keyboard-toggle');
+        const mouseToggle = document.getElementById('mouse-toggle');
+        const screenshotBtn = document.getElementById('screenshot');
+        const rebootBtn = document.getElementById('reboot');
+        const volumeBtn = document.getElementById('volume');
 
         let emulator;
         let bootStartTime = Date.now();
+        let audioEnabled = true;
+        let mouseMode = 'relative';
 
         try {
             emulator = new V86({
@@ -157,17 +306,7 @@
                 autostart: true,
                 memory_size: 512 * 1024 * 1024,
                 vga_memory_size: 8 * 1024 * 1024,
-                
-                // Enable audio (Web Audio API)
-                audio_adapter: function() {
-                    return new AudioContext();
-                },
-                
-                // Enable networking (user mode networking)
-                network_adapter: new V86Starter.NetworkAdapter(V86Starter.IPADDRESS),
-                
-                // Enable mouse and keyboard
-                keyboard_adapter: new V86Starter.KeyboardAdapter(),
+                disable_audio: false,
             });
 
             // Boot progress
@@ -175,7 +314,7 @@
             const bootInterval = setInterval(() => {
                 bootTime++;
                 const elapsed = ((Date.now() - bootStartTime) / 1000).toFixed(1);
-                statusEl.textContent = `⏱️ Booting... ${elapsed}s`;
+                statusEl.textContent = `⏳ Booting... ${elapsed}s`;
                 
                 if (bootTime > 180) clearInterval(bootInterval);
             }, 1000);
@@ -183,41 +322,90 @@
             emulator.add_listener('emulator-ready', function() {
                 clearInterval(bootInterval);
                 loadingEl.style.display = 'none';
-                statusEl.textContent = '✓ Windows XP Ready | Audio: Enabled | Network: Enabled';
-                console.log('Windows XP emulator ready!');
+                statusEl.textContent = '✅ Windows XP Ready | Audio: On | Network: On';
+                console.log('Windows XP ready!');
             });
 
             emulator.add_listener('emulator-stopped', function() {
-                statusEl.textContent = '⊗ Emulator Stopped';
-            });
-
-            // Handle fullscreen
-            screenEl.addEventListener('dblclick', () => {
-                if (screenEl.requestFullscreen) {
-                    screenEl.requestFullscreen();
-                }
+                statusEl.textContent = '⏹️ Stopped';
             });
 
         } catch (error) {
-            console.error('Emulator error:', error);
+            console.error('Error:', error);
             loadingEl.innerHTML = `
                 <div class="error">
-                    <strong>❌ Error starting emulator</strong><br><br>
+                    <strong>❌ Emulator Error</strong><br><br>
                     ${error.message}<br><br>
-                    <small>Required files:<br>
-                    ✓ /bios/seabios.bin<br>
-                    ✓ /bios/vgabios.bin<br>
-                    ✓ /images/windows_xp.img
-                    </small>
+                    <small>Check files: seabios.bin, vgabios.bin, windows_xp.img</small>
                 </div>
             `;
-            statusEl.textContent = '⊗ Failed to start';
+            statusEl.textContent = '❌ Failed';
         }
 
-        // Prevent accidental navigation
-        window.addEventListener('beforeunload', (e) => {
+        // Keyboard toggle
+        keyboardToggle.addEventListener('click', () => {
+            keyboardEl.classList.toggle('active');
+            keyboardToggle.style.background = keyboardEl.classList.contains('active') ? '#ff6b6b' : '#1e90ff';
+        });
+
+        // Virtual keyboard keys
+        document.querySelectorAll('.key').forEach(key => {
+            key.addEventListener('click', () => {
+                if (emulator) {
+                    const keyName = key.dataset.key;
+                    emulator.keyboard_send_scancodes([V86.SCANCODE_MAP[keyName]]);
+                }
+            });
+        });
+
+        // Screenshot
+        screenshotBtn.addEventListener('click', () => {
+            if (emulator && emulator.get_canvas) {
+                const canvas = emulator.get_canvas();
+                const link = document.createElement('a');
+                link.href = canvas.toDataURL();
+                link.download = 'xp-' + Date.now() + '.png';
+                link.click();
+                statusEl.textContent = '📸 Screenshot saved';
+            }
+        });
+
+        // Reboot
+        rebootBtn.addEventListener('click', () => {
+            if (emulator) {
+                emulator.keyboard_send_scancodes([
+                    V86.SCANCODE_MAP['ControlLeft'],
+                    V86.SCANCODE_MAP['AltLeft'],
+                    V86.SCANCODE_MAP['Delete'],
+                ]);
+                statusEl.textContent = '🔄 Sending Ctrl+Alt+Del...';
+            }
+        });
+
+        // Audio toggle
+        volumeBtn.addEventListener('click', () => {
+            audioEnabled = !audioEnabled;
+            volumeBtn.style.background = audioEnabled ? '#1e90ff' : '#ff6b6b';
+            statusEl.textContent = audioEnabled ? '🔊 Audio ON' : '🔇 Audio OFF';
+        });
+
+        // Prevent scroll on mobile
+        document.addEventListener('touchmove', (e) => {
+            if (e.target === screenEl) {
+                e.preventDefault();
+            }
+        }, { passive: false });
+
+        // Handle mobile keyboard
+        window.addEventListener('orientationchange', () => {
+            setTimeout(() => {
+                window.scrollTo(0, 0);
+            }, 100);
+        });
+
+        // Prevent default iOS gestures
+        document.addEventListener('gesturestart', (e) => {
             e.preventDefault();
-            return false;
         });
     </script>
 </body>
