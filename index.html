@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="n.eko Workspace">
+    <meta name="theme-color" content="#1a1a1a">
+    <title>n.eko Virtual Desktop</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-user-select: none;
+            user-select: none;
+            -webkit-touch-callout: none;
+        }
+
+        html,
+        body {
+            width: 100%;
+            height: 100%;
+            background: #1a1a1a;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            overflow: hidden;
+            position: fixed;
+        }
+
+        body {
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-start;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #2a2a2a 0%, #1a1a1a 100%);
+            color: #fff;
+            padding: 8px 12px;
+            font-size: 14px;
+            font-weight: 600;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid #333;
+            z-index: 10;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+        }
+
+        .status-indicator {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #4ade80;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% {
+                opacity: 1;
+                box-shadow: 0 0 0 0 rgba(74, 222, 128, 0.7);
+            }
+            50% {
+                opacity: 0.8;
+                box-shadow: 0 0 0 4px rgba(74, 222, 128, 0.3);
+            }
+        }
+
+        .container {
+            flex: 1;
+            width: 100%;
+            height: calc(100vh - 50px);
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #0a0a0a;
+            overflow: hidden;
+        }
+
+        .iframe-wrapper {
+            width: 100%;
+            height: 100%;
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 0;
+        }
+
+        iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
+            display: block;
+            background: #000;
+        }
+
+        .loading {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            text-align: center;
+            color: #888;
+            z-index: 5;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 3px solid #333;
+            border-top-color: #4ade80;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        .footer {
+            background: #0a0a0a;
+            color: #666;
+            padding: 8px 12px;
+            font-size: 11px;
+            text-align: center;
+            border-top: 1px solid #222;
+        }
+
+        /* iOS Safari specific fixes */
+        @supports (-webkit-touch-callout: none) {
+            body {
+                padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
+            }
+
+            .container {
+                height: calc(100vh - 50px - env(safe-area-inset-bottom));
+            }
+
+            .header {
+                padding-top: max(8px, env(safe-area-inset-top));
+            }
+        }
+
+        /* Fullscreen mode */
+        iframe:fullscreen {
+            width: 100%;
+            height: 100%;
+        }
+
+        /* Touch and pointer optimizations */
+        @media (hover: none) and (pointer: coarse) {
+            /* Mobile devices */
+            .container {
+                -webkit-user-select: none;
+                -webkit-touch-callout: none;
+            }
+
+            iframe {
+                -webkit-user-select: none;
+                -webkit-touch-callout: none;
+            }
+        }
+
+        /* Landscape orientation */
+        @media (max-height: 600px) {
+            .header {
+                padding: 4px 8px;
+                font-size: 12px;
+            }
+
+            .container {
+                height: calc(100vh - 40px);
+            }
+        }
+
+        /* Portrait orientation */
+        @media (max-width: 600px) and (orientation: portrait) {
+            body {
+                display: flex;
+                flex-direction: column;
+            }
+
+            .header {
+                order: -1;
+            }
+
+            .container {
+                order: 0;
+                flex: 1;
+            }
+
+            .footer {
+                order: 1;
+            }
+        }
+
+        /* Error message styling */
+        .error-message {
+            color: #ff6b6b;
+            padding: 12px;
+            background: rgba(255, 107, 107, 0.1);
+            border-radius: 4px;
+            border: 1px solid rgba(255, 107, 107, 0.3);
+            margin-top: 8px;
+            font-size: 12px;
+            line-height: 1.4;
+        }
+
+        /* Notification badge */
+        .notification {
+            background: #4ade80;
+            color: #000;
+            padding: 4px 8px;
+            border-radius: 3px;
+            font-size: 11px;
+            font-weight: 600;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <span>n.eko Virtual Desktop</span>
+        <div class="status-indicator">
+            <span class="status-dot"></span>
+            <span id="status">Connecting...</span>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="loading" id="loading">
+            <div class="spinner"></div>
+            <div>Launching workspace...</div>
+        </div>
+        <div class="iframe-wrapper">
+            <iframe id="neko-iframe" title="n.eko Virtual Desktop Workspace" sandbox="allow-same-origin allow-scripts allow-pointer-lock allow-popups allow-downloads"></iframe>
+        </div>
+    </div>
+
+    <div class="footer">
+        <span id="version">n.eko Virtual Desktop • Mobile Optimized</span>
+    </div>
+
+    <script>
+        // Configuration - Update with your actual deployment URL
+        const NEKO_URL = window.location.origin === 'file://' 
+            ? 'http://localhost:8080' 
+            : window.location.origin;
+
+        const iframe = document.getElementById('neko-iframe');
+        const loadingEl = document.getElementById('loading');
+        const statusEl = document.getElementById('status');
+        const iframeWrapper = document.querySelector('.iframe-wrapper');
+
+        // Set iframe source
+        iframe.src = NEKO_URL;
+
+        // Handle iframe load events
+        iframe.addEventListener('load', function () {
+            loadingEl.style.display = 'none';
+            statusEl.textContent = 'Connected';
+            statusEl.style.color = '#4ade80';
+        });
+
+        iframe.addEventListener('error', function () {
+            statusEl.textContent = 'Connection Error';
+            statusEl.style.color = '#ff6b6b';
+            loadingEl.innerHTML = `
+                <div class="spinner" style="border-top-color: #ff6b6b;"></div>
+                <div>Failed to connect to workspace</div>
+                <div class="error-message">
+                    Make sure the n.eko service is running at <strong>${NEKO_URL}</strong>
+                </div>
+            `;
+        });
+
+        // Prevent zooming with double-tap and gestures
+        document.addEventListener('touchmove', function (e) {
+            if (e.touches.length > 1) {
+                e.preventDefault();
+            }
+        }, { passive: false });
+
+        let lastTouchEnd = 0;
+        document.addEventListener('touchend', function (e) {
+            const now = Date.now();
+            if (now - lastTouchEnd <= 300) {
+                e.preventDefault();
+            }
+            lastTouchEnd = now;
+        }, { passive: false });
+
+        // Handle fullscreen requests from iframe content
+        document.addEventListener('fullscreenchange', function () {
+            if (document.fullscreenElement) {
+                document.body.style.background = '#000';
+            } else {
+                document.body.style.background = '#1a1a1a';
+            }
+        });
+
+        // Show loading after a delay if connection is slow
+        setTimeout(function () {
+            if (loadingEl.style.display !== 'none') {
+                loadingEl.innerHTML = `
+                    <div class="spinner"></div>
+                    <div>Still connecting...</div>
+                    <div style="font-size: 12px; color: #666; margin-top: 8px;">
+                        This may take a moment on first load
+                    </div>
+                `;
+            }
+        }, 3000);
+
+        // Detect connection status
+        const checkConnection = async () => {
+            try {
+                const response = await fetch(NEKO_URL + '/api/health', {
+                    method: 'GET',
+                    mode: 'no-cors',
+                });
+                statusEl.textContent = 'Connected';
+                statusEl.style.color = '#4ade80';
+            } catch (error) {
+                statusEl.textContent = 'Connecting...';
+                statusEl.style.color = '#888';
+            }
+        };
+
+        // Check connection status on load
+        window.addEventListener('load', checkConnection);
+
+        // Periodic connection checks
+        setInterval(checkConnection, 10000);
+
+        // Handle visibility change for performance
+        document.addEventListener('visibilitychange', function () {
+            if (document.hidden) {
+                iframe.style.opacity = '0.5';
+            } else {
+                iframe.style.opacity = '1';
+            }
+        });
+
+        // Prevent context menu on mobile (optional - uncomment to disable right-click)
+        // document.addEventListener('contextmenu', function(e) {
+        //     e.preventDefault();
+        //     return false;
+        // }, { passive: false });
+
+        // Log initialization
+        console.log('n.eko Virtual Desktop initialized');
+        console.log('Target URL:', NEKO_URL);
+        console.log('User Agent:', navigator.userAgent);
+    </script>
+</body>
+</html>
